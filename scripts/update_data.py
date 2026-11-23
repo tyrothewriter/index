@@ -3,9 +3,9 @@ import yfinance as yf
 
 GROUPS = [
     ("asia", "เอเชีย-แปซิฟิก", [
-        ("^SET.BK", "ไทย SET"), ("^N225", "ญี่ปุ่น Nikkei 225"), ("^HSI", "ฮ่องกง Hang Seng"),
+        ("^N225", "ญี่ปุ่น Nikkei 225"), ("^HSI", "ฮ่องกง Hang Seng"),
         ("^STI", "สิงคโปร์ STI"), ("^BSESN", "อินเดีย Sensex"), ("^NSEI", "อินเดีย Nifty 50"),
-        ("^JKSE", "อินโดนีเซีย JCI"), ("PSEI.PS", "ฟิลิปปินส์ PSEi"), ("^KLSE", "มาเลเซีย KLCI"),
+        ("^JKSE", "อินโดนีเซีย JCI"), ("^KLSE", "มาเลเซีย KLCI"),
         ("^AXJO", "ออสเตรเลีย ASX 200")]),
     ("europe", "ยุโรป", [
         ("^FTSE", "อังกฤษ FTSE 100"), ("^FCHI", "ฝรั่งเศส CAC 40"),
@@ -17,6 +17,8 @@ GROUPS = [
     ("commodities", "ทองโลก น้ำมัน ค่าระวางเรือ", [
         ("GC=F", "ทองคำตลาดโลก (USD/oz)"), ("CL=F", "น้ำมัน WTI (USD/bbl)"),
         ("BZ=F", "น้ำมัน Brent (USD/bbl)"), ("^BDI", "Baltic Dry Index (ค่าระวางเรือ)")]),
+    ("fx", "คริปโตและค่าเงิน", [
+        ("BTC-USD", "Bitcoin (BTC/USD)"), ("THB=X", "ดอลลาร์สหรัฐ/บาท (USD/THB)")]),
 ]
 
 def quote(sym, tries=3):
