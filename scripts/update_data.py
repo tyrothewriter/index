@@ -22,6 +22,8 @@ GROUPS = [
         ("BTC-USD", "Bitcoin (BTC/USD)"), ("THB=X", "ดอลลาร์สหรัฐ/บาท (USD/THB)")]),
 ]
 
+LINK_ONLY = {"^BDI": "https://tradingeconomics.com/commodity/baltic"}  # ไม่มีแหล่งราคาฟรี ให้คลิกไปดูเอง
+
 def quote(sym, tries=3):
     for _ in range(tries):
         try:
@@ -55,6 +57,9 @@ def main():
     for gid, title, items in GROUPS:
         rows = []
         for sym, name in items:
+            if sym in LINK_ONLY:
+                rows.append({"symbol": sym, "name": name, "url": LINK_ONLY[sym]})
+                continue
             q = quote(sym)
             ok += q is not None
             rows.append({"symbol": sym, "name": name, **(q or {})})
