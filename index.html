@@ -52,9 +52,10 @@ function spark(a,cls){
 }
 const yurl=s=>"https://finance.yahoo.com/quote/"+encodeURIComponent(s);
 function row(r){
-  const go=`onclick="if(!event.target.closest('a'))window.open('${yurl(r.symbol)}','_blank','noopener')" title="คลิกเพื่อดูรายละเอียด"`;
-  const sym=`<a href="${yurl(r.symbol)}" target="_blank" rel="noopener">${r.symbol}</a>`;
-  if(r.price==null)return `<div class="row" ${go}><div class="n">${r.name}<small>${sym}</small></div><div class="p">ไม่มีข้อมูล</div><div></div></div>`;
+  const u=r.url||yurl(r.symbol);
+  const go=`onclick="if(!event.target.closest('a'))window.open('${u}','_blank','noopener')" title="คลิกเพื่อดูรายละเอียด"`;
+  const sym=`<a href="${u}" target="_blank" rel="noopener">${r.url?"TradingEconomics":r.symbol}</a>`;
+  if(r.price==null)return `<div class="row" ${go}><div class="n">${r.name}<small>${sym}</small></div><div class="p">${r.url?"คลิกเพื่อดูราคา ›":"ไม่มีข้อมูล"}</div><div></div></div>`;
   const c=r.change>=0?"up":"down",s=r.change>=0?"+":"";
   return `<div class="row" ${go}><div class="n">${r.name}<small>${sym} · ${r.asof}</small></div>
   <div class="p"><b>${f(r.price)}</b><span class="${c}">${s}${f(r.change)} (${s}${f(r.pct)}%)</span></div>
