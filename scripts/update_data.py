@@ -1,3 +1,4 @@
+"""ดึงราคาตลาดหุ้น ทอง น้ำมัน ค่าระวางเรือ คริปโต และดัชนีล่วงหน้า แล้วเขียนลง data/data.json"""
 import json, time, sys, datetime as dt, pathlib
 import yfinance as yf
 
@@ -22,14 +23,26 @@ GROUPS = [
 ]
 
 def quote(sym, tries=3):
-    for i in range(tries):
+    for _ in range(tries):
         try:
-            c = yf.Ticker(sym).history(period="1mo", interval="1d", auto_adjust=False)["Close"].dropna()
-            if len(c) >= 2:
-                last, prev = float(c.iloc[-1]), float(c.iloc[-2])
+            t = yf.Ticker(sym)
+            d = t.history(period="1mo", interval="1d", auto_adjust=False)["Close"].dropna()
+            closes = [float(x) for x in d.values]
+            dates = [x.strftime("%Y-%m-%d") for x in d.index]
+            try:
+                i = t.history(period="5d", interval="15m", auto_adjust=False)["Close"].dropna()
+                if len(i) and dates:
+                    day = i.index[-1].strftime("%Y-%m-%d")
+                    if day >= dates[-1]:  # ข้อมูลราย 15 นาทีใหม่กว่าหรือเท่ากับรายวัน
+                        keep = [k for k, dd in enumerate(dates) if dd < day]
+                        closes = [closes[k] for k in keep] + [float(i.iloc[-1])]
+                        dates = [dates[k] for k in keep] + [day]
+            except Exception as e:
+                print("intraday fail", sym, e)
+            if len(closes) >= 2:
+                last, prev = closes[-1], closes[-2]
                 return {"price": last, "change": last - prev, "pct": (last - prev) / prev * 100,
-                        "asof": c.index[-1].strftime("%Y-%m-%d"),
-                        "spark": [round(float(x), 2) for x in c.tail(30)]}
+                        "asof": dates[-1], "spark": [round(x, 2) for x in closes[-30:]]}
         except Exception as e:
             print("ERR", sym, e)
         time.sleep(2)
@@ -54,4 +67,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
