@@ -26,7 +26,6 @@ h1 img{width:44px;height:44px}
 #stamp{color:var(--mute);font-size:13px}
 main{max-width:1180px;margin:0 auto;padding:12px 20px 48px;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}
 section{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 16px 10px}
-section.gold{border-color:var(--gold)}
 h2{font-size:15px;font-weight:700;margin:12px 0 4px}
 .row{display:grid;grid-template-columns:1fr auto 70px;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
 .row:first-of-type{border-top:0}
@@ -35,9 +34,8 @@ h2{font-size:15px;font-weight:700;margin:12px 0 4px}
 .p b{display:block;font-weight:500;font-size:16px}
 .up{color:var(--up)}.down{color:var(--down)}
 svg{width:70px;height:26px}
-.kv{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
-.kv:first-of-type{border-top:0}
-.note{color:var(--mute);font-size:12px;margin:6px 0 2px}
+.row{cursor:pointer}
+.n a{color:inherit}
 </style>
 </head>
 <body>
@@ -52,28 +50,21 @@ function spark(a,cls){
   const pts=a.map((v,i)=>`${(i/(a.length-1)*w).toFixed(1)},${(h-2-(v-mn)/((mx-mn)||1)*(h-4)).toFixed(1)}`).join(" ");
   return `<svg viewBox="0 0 ${w} ${h}" class="${cls}"><polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`;
 }
+const yurl=s=>"https://finance.yahoo.com/quote/"+encodeURIComponent(s);
 function row(r){
-  if(r.price==null)return `<div class="row"><div class="n">${r.name}<small>${r.symbol}</small></div><div class="p">ไม่มีข้อมูล</div><div></div></div>`;
+  const go=`onclick="if(!event.target.closest('a'))window.open('${yurl(r.symbol)}','_blank','noopener')" title="คลิกเพื่อดูรายละเอียด"`;
+  const sym=`<a href="${yurl(r.symbol)}" target="_blank" rel="noopener">${r.symbol}</a>`;
+  if(r.price==null)return `<div class="row" ${go}><div class="n">${r.name}<small>${sym}</small></div><div class="p">ไม่มีข้อมูล</div><div></div></div>`;
   const c=r.change>=0?"up":"down",s=r.change>=0?"+":"";
-  return `<div class="row"><div class="n">${r.name}<small>${r.symbol} · ${r.asof}</small></div>
+  return `<div class="row" ${go}><div class="n">${r.name}<small>${sym} · ${r.asof}</small></div>
   <div class="p"><b>${f(r.price)}</b><span class="${c}">${s}${f(r.change)} (${s}${f(r.pct)}%)</span></div>
   <div class="${c}">${spark(r.spark,c)}</div></div>`;
-}
-function goldCard(g){
-  if(!g)return"";
-  const kv=(k,v)=>`<div class="kv"><span>${k}</span><b>${v}</b></div>`;
-  return `<section class="gold"><h2>ทองคำไทย (บาท/บาททองคำ)</h2>
-  ${kv("ทองคำแท่ง รับซื้อ",baht(g.bar_buy))}${kv("ทองคำแท่ง ขายออก",baht(g.bar_sell))}
-  ${kv("ทองรูปพรรณ รับซื้อ",baht(g.orn_buy))}${kv("ทองรูปพรรณ ขายออก",baht(g.orn_sell))}
-  ${g.theory_bar?kv("ราคาคำนวณจากทองโลก × USD/THB "+g.usdthb,baht(g.theory_bar)):""}
-  <div class="note">${g.source?`ที่มา: ${g.source} · อัปเดต ${g.updated||""}`:"ดึงราคาทองไทยไม่สำเร็จ แสดงเฉพาะราคาคำนวณ"}</div></section>`;
 }
 async function load(){
   try{
     const d=await (await fetch("data/data.json?t="+Date.now())).json();
     document.getElementById("stamp").textContent="อัปเดตล่าสุด "+new Date(d.updated).toLocaleString("th-TH",{timeZone:"Asia/Bangkok"})+" (เวลาไทย) · ราคาอาจล่าช้า 15–20 นาที";
     let html=d.groups.map(g=>`<section><h2>${g.title}</h2>${g.rows.map(row).join("")}</section>`).join("");
-    html+=goldCard(d.thai_gold);
     document.getElementById("app").innerHTML=html;
   }catch(e){document.getElementById("stamp").textContent="โหลดข้อมูลไม่สำเร็จ: ยังไม่มี data/data.json ให้รัน workflow ก่อน";}
 }
